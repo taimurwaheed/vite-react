@@ -1,5 +1,5 @@
 // ProductTableRow component is a functional component that renders a table row for each product.
-const ProductTableRow = ({ productsData, onDelete }) => {
+const ProductTableRow = ({ productsData, onDelete, onEdit }) => {
     return (
       // Mapping through the array of products to create a table row for each product
       productsData.map((data, index) => {
@@ -18,7 +18,7 @@ const ProductTableRow = ({ productsData, onDelete }) => {
               {/* Separator between Delete and Edit buttons */}
               {' | '}
               {/* Edit button (not implemented in this code snippet) */}
-              <button>Edit</button>
+              <button onClick={() => onEdit(data)}>Edit</button>
             </td>
           </tr>
         );

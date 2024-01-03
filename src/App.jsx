@@ -13,43 +13,86 @@ const App = () =>{
   })
 
   // Handling form submission
-  const SubmitForm = (e)=>{
+  const SubmitForm = (e) => {
     e.preventDefault();
-    // Checking if 'name' and 'description' fields are not empty
-    if(input.name!="" && input.description!="")
-    { 
-      // If conditions are met, call 'onAdd' function
+    if (input.id) {
+      onUpdate();
+    } 
+    else if (input.name !== "" && input.description !== "") 
+    {
       onAdd();
-      // Resetting the 'input' state to empty values
-      setInput(
-        { id:"",
-        name:"",
-        description:""}
-      )
-    } else {
-      return alert("Please fill all fields");
+    } 
+    else {
+      alert("Please fill in all the fields");
     }
-  }
+    };
 
   // Adding a new product
-  const onAdd = ()=>{
-    fetch("http://localhost:3000/products",
-      {
-        method:"POST",
-        headers:{
-          "Accept":"application/json",
-          "Content-Type":"application/json"
-        },
-        // Converting 'input' data to JSON and sending it in the request body
-        body:JSON.stringify(input)
-      }
-    )
-    .then(response=>response.json())
-    
-    // Updating the 'products' state with the new product
-    .then(data=>setProduct([...products,data]))
-    .catch(error=>console.log(error))
-  }
+  const onAdd = () => {
+    console.log("onAdd function called");
+  
+    fetch("http://localhost:3000/products", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      // Converting 'input' data to JSON and sending it in the request body
+      body: JSON.stringify(input),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Product added successfully:", data);
+        // Updating the 'products' state with the new product
+        setProduct([...products, data]);
+      })
+      .catch(error => {
+        console.error("Error adding product:", error);
+      });
+  };
+  
+
+  const onUpdate = () => {
+    console.log("Updating product with ID:", input.id);
+    console.log("Sending data:", input);
+    if (!input.id) {
+      console.error("Cannot update without a valid product ID");
+      return;
+    }
+  
+    fetch(`http://localhost:3000/products/${input.id}`, {
+      method: "PUT",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(input),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((updatedProduct) => {
+        console.log("Product updated successfully:", updatedProduct);
+        // Map through the products and update the one with the matching ID
+        const updatedProducts = products.map((product) =>
+          product.id === updatedProduct.id ? updatedProduct : product
+        );
+        // Update the state with the new products and reset the input
+        setProduct(updatedProducts);
+        setInput({ id: "", name: "", description: "" });
+      })
+      .catch((error) => {
+        console.error("Error updating product:", error);
+      });
+  };  
 
   // Deleting a product by ID
   const onDelete = (id)=>{
@@ -75,6 +118,16 @@ const App = () =>{
     })
     .catch(error=>console.log(error))
   }
+
+  const onEdit = (product) => {
+    // Set the form inputs with the data of the selected product for editing
+    setInput({
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    });
+    };
+   
 
   // Fetching products from the server on component mount
   useEffect(()=>{
@@ -154,7 +207,7 @@ const App = () =>{
           // Checking if there are products to display
           products.length>0?
           /* If there are products, show the list of products using the ProductTableRow component */
-          <ProductTableRow productsData={products} onDelete={onDelete}/>
+          <ProductTableRow productsData={products} onDelete={onDelete} onEdit={onEdit}/>
           // If there are no products, show a message
           :<tr><th colSpan={4}>No data available</th></tr>
         }
