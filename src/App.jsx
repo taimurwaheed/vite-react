@@ -67,7 +67,9 @@ const App = () =>{
         // Filtering out the deleted product from 'products' and updating the state
         const newProduct = products.filter(p=>{
           return p.id!=id;
+          //condition to check current product id doesn't match id of the product being deleted
         })
+        // Updating the state 'products' with the new array excluding the deleted product
         setProduct(newProduct);
       }
     })
